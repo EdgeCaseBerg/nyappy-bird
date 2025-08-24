@@ -1,21 +1,28 @@
 package spare.peetseater.nb;
 
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /** First screen of the application. Displayed after the application is created. */
 public class FirstScreen implements Screen {
 
-    private OrthographicCamera camera;
-    private FitViewport viewport;
+    private final OrthographicCamera camera;
+    private final FitViewport viewport;
     NyappyBirdGame game;
+
+    Texture playerTexture;
 
     public FirstScreen(NyappyBirdGame game) {
         this.camera = new OrthographicCamera();
         this.viewport = new FitViewport(game.worldWidth, game.worldHeight, camera);
         this.camera.setToOrtho(false, game.worldWidth, game.worldHeight);
         this.game = game;
+
+        playerTexture = NyappyAssets.makeTexture(Color.BLUE);
     }
 
     @Override
@@ -25,7 +32,12 @@ public class FirstScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        // Draw your screen here. "delta" is the time since last render in seconds.
+        this.camera.update();
+        this.game.batch.setProjectionMatrix(camera.combined);
+        ScreenUtils.clear(Color.YELLOW);
+        this.game.batch.begin();
+        this.game.batch.draw(playerTexture, 4,3, 1, 1);
+        this.game.batch.end();
     }
 
     @Override
