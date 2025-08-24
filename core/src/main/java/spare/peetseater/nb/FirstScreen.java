@@ -4,6 +4,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -30,13 +31,21 @@ public class FirstScreen implements Screen {
         this.game = game;
 
         playerTexture = NyappyAssets.makeTexture(Color.BLUE);
-        player = new Player(4,3);
+        player = new Player(4,3, 1, 1);
 
         tunnelTexture = NyappyAssets.makeTexture(Color.RED);
         killPlanes = new LinkedList<KillPlane>();
         // The floor and ceiling
         killPlanes.add(new KillPlane(0, 0, game.worldWidth, 1));
         killPlanes.add(new KillPlane(0, game.worldHeight - 1, game.worldWidth, 1));
+
+        KillPlane jaw1Bottom = new KillPlane(6, 0, 0.5f, 3);
+        KillPlane jaw1Top = new KillPlane(6, 5, 0.5f, 3);
+        Vector2 obstacleSpeed = new Vector2(1, 0);
+        jaw1Bottom.setVelocity(obstacleSpeed);
+        jaw1Top.setVelocity(obstacleSpeed);
+        killPlanes.add(jaw1Bottom);
+        killPlanes.add(jaw1Top);
     }
 
     @Override
@@ -46,14 +55,13 @@ public class FirstScreen implements Screen {
 
     private void update(float delta) {
         this.camera.update();
+        this.game.batch.setProjectionMatrix(camera.combined);
         this.player.update(delta, 0.5f);
         playerMustDie = false;
         for (KillPlane killPlane : killPlanes) {
-            playerMustDie = killPlane.intersects(player);
-            if (playerMustDie) break;
+            killPlane.update(delta);
+            playerMustDie = playerMustDie || killPlane.intersects(player);
         }
-
-        this.game.batch.setProjectionMatrix(camera.combined);
     }
 
     private void draw(float delta) {
