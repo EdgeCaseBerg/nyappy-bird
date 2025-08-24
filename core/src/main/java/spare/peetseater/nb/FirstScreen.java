@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /** First screen of the application. Displayed after the application is created. */
 public class FirstScreen implements Screen {
 
@@ -15,6 +18,10 @@ public class FirstScreen implements Screen {
     NyappyBirdGame game;
 
     Texture playerTexture;
+    Texture tunnelTexture;
+    Player player;
+    List<KillPlane> killPlanes;
+    private boolean playerMustDie;
 
     public FirstScreen(NyappyBirdGame game) {
         this.camera = new OrthographicCamera();
@@ -23,6 +30,13 @@ public class FirstScreen implements Screen {
         this.game = game;
 
         playerTexture = NyappyAssets.makeTexture(Color.BLUE);
+        player = new Player(4,3);
+
+        tunnelTexture = NyappyAssets.makeTexture(Color.RED);
+        killPlanes = new LinkedList<KillPlane>();
+        // The floor and ceiling
+        killPlanes.add(new KillPlane(0, 0, game.worldWidth, 1));
+        killPlanes.add(new KillPlane(0, game.worldHeight - 1, game.worldWidth, 1));
     }
 
     @Override
@@ -30,14 +44,39 @@ public class FirstScreen implements Screen {
         // Prepare your screen here.
     }
 
+    private void update(float delta) {
+        this.camera.update();
+        this.player.update(delta, 0.5f);
+        playerMustDie = false;
+        for (KillPlane killPlane : killPlanes) {
+            playerMustDie = killPlane.intersects(player);
+            if (playerMustDie) break;
+        }
+
+        this.game.batch.setProjectionMatrix(camera.combined);
+    }
+
+    private void draw(float delta) {
+        ScreenUtils.clear(Color.YELLOW);
+        if (playerMustDie) {
+            ScreenUtils.clear(Color.GREEN);
+        }
+        this.game.batch.begin();
+        this.game.batch.draw(playerTexture, player.getX(),player.getY(), 1, 1);
+        for (KillPlane killPlane : killPlanes) {
+            this.game.batch.draw(
+                tunnelTexture,
+                killPlane.getLeftCornerX(), killPlane.getLeftCornerY(),
+                killPlane.getWidth(), killPlane.getHeight()
+            );
+        }
+        this.game.batch.end();
+    }
+
     @Override
     public void render(float delta) {
-        this.camera.update();
-        this.game.batch.setProjectionMatrix(camera.combined);
-        ScreenUtils.clear(Color.YELLOW);
-        this.game.batch.begin();
-        this.game.batch.draw(playerTexture, 4,3, 1, 1);
-        this.game.batch.end();
+        update(delta);
+        draw(delta);
     }
 
     @Override
