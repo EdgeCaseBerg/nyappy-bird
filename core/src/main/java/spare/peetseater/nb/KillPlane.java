@@ -28,6 +28,10 @@ public class KillPlane {
         return overlapsXProjection && overlapsYProjection;
     }
 
+    public boolean isOutOfSight() {
+        return this.leftCornerX + this.width < 0;
+    }
+
     public void setLeftCornerX(float leftCornerX) {
         this.leftCornerX = leftCornerX;
     }

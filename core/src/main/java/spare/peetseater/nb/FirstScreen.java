@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class FirstScreen implements Screen {
     Player player;
     List<KillPlane> killPlanes;
     private boolean playerMustDie;
+    ObstacleGenerator obstacleGenerator;
 
     public FirstScreen(NyappyBirdGame game) {
         this.camera = new OrthographicCamera();
@@ -39,13 +41,20 @@ public class FirstScreen implements Screen {
         killPlanes.add(new KillPlane(0, 0, game.worldWidth, 1));
         killPlanes.add(new KillPlane(0, game.worldHeight - 1, game.worldWidth, 1));
 
-        KillPlane jaw1Bottom = new KillPlane(6, 0, 0.5f, 3);
-        KillPlane jaw1Top = new KillPlane(6, 5, 0.5f, 3);
+
+
+        obstacleGenerator = new ObstacleGenerator(game.worldWidth - 1,game.worldHeight / 2, 2, game.worldHeight);
+        generateNewObstacle();
+    }
+
+    private void generateNewObstacle() {
         Vector2 obstacleSpeed = new Vector2(1, 0);
-        jaw1Bottom.setVelocity(obstacleSpeed);
-        jaw1Top.setVelocity(obstacleSpeed);
-        killPlanes.add(jaw1Bottom);
-        killPlanes.add(jaw1Top);
+        List<KillPlane> obstacles = obstacleGenerator.next(
+            0.5f,
+            1.2f,
+            obstacleSpeed.x
+        );
+        killPlanes.addAll(obstacles);
     }
 
     @Override
@@ -56,12 +65,17 @@ public class FirstScreen implements Screen {
     private void update(float delta) {
         this.camera.update();
         this.game.batch.setProjectionMatrix(camera.combined);
-        this.player.update(delta, 0.5f);
+//        this.player.update(delta, 0.5f);
         playerMustDie = false;
+        List<KillPlane> toRemove = new ArrayList<>();
         for (KillPlane killPlane : killPlanes) {
+            if (killPlane.isOutOfSight()) {
+                toRemove.add(killPlane);
+            }
             killPlane.update(delta);
             playerMustDie = playerMustDie || killPlane.intersects(player);
         }
+        killPlanes.removeAll(toRemove);
     }
 
     private void draw(float delta) {
@@ -70,7 +84,7 @@ public class FirstScreen implements Screen {
             ScreenUtils.clear(Color.GREEN);
         }
         this.game.batch.begin();
-        this.game.batch.draw(playerTexture, player.getX(),player.getY(), 1, 1);
+        this.game.batch.draw(playerTexture, player.getX(), player.getY(), 1, 1);
         for (KillPlane killPlane : killPlanes) {
             this.game.batch.draw(
                 tunnelTexture,
@@ -81,8 +95,14 @@ public class FirstScreen implements Screen {
         this.game.batch.end();
     }
 
+    float accum = 0;
     @Override
     public void render(float delta) {
+        accum += delta;
+        if (accum > 3) {
+            generateNewObstacle();
+            accum = 0;
+        }
         update(delta);
         draw(delta);
     }
