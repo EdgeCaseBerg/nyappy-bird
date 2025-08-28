@@ -1,5 +1,6 @@
 package spare.peetseater.nb;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -17,6 +18,7 @@ public class FirstScreen implements Screen {
 
     private final OrthographicCamera camera;
     private final FitViewport viewport;
+    private final FlapInputAdapter flapInputAdapter;
     NyappyBirdGame game;
 
     Texture playerTexture;
@@ -41,7 +43,15 @@ public class FirstScreen implements Screen {
         killPlanes.add(new KillPlane(0, 0, game.worldWidth, 1));
         killPlanes.add(new KillPlane(0, game.worldHeight - 1, game.worldWidth, 1));
 
-
+         FlapInputSubscriber subscriber = new FlapInputSubscriber() {
+             @Override
+             public void onFlapInput() {
+                 player.setLift(1.2f);
+             }
+         };
+         flapInputAdapter = new FlapInputAdapter(0.5f);
+         flapInputAdapter.addSubscriber(subscriber);
+         Gdx.input.setInputProcessor(flapInputAdapter);
 
         obstacleGenerator = new ObstacleGenerator(game.worldWidth - 1,game.worldHeight / 2, 2, game.worldHeight);
         generateNewObstacle();
@@ -63,9 +73,11 @@ public class FirstScreen implements Screen {
     }
 
     private void update(float delta) {
+        float gravity = 0.5f;
+        this.player.update(delta, gravity);
+        this.flapInputAdapter.update(delta);
         this.camera.update();
         this.game.batch.setProjectionMatrix(camera.combined);
-//        this.player.update(delta, 0.5f);
         playerMustDie = false;
         List<KillPlane> toRemove = new ArrayList<>();
         for (KillPlane killPlane : killPlanes) {
