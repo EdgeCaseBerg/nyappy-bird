@@ -15,11 +15,11 @@ public class Player {
         this.lift = 0;
     }
 
-    public void update(float delta, float gravity) {
+    public void update(float delta, float gravity, float decay) {
         this.y -= gravity * delta;
         this.y += lift * delta;
-        float decay = 0.25f * delta;
-        this.lift -= decay;
+        float liftDecay = decay * delta;
+        this.lift -= liftDecay;
     }
 
     public float getX() {

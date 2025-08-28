@@ -7,13 +7,13 @@ import java.util.List;
 
 public class FlapInputAdapter extends InputAdapter {
 
-    private final float timeBetweenClicksSeconds;
+    private final LevelSettings levelSettings;
     private float timer;
     private boolean isOnCooldown;
     private List<FlapInputSubscriber> subscribers;
 
-    public FlapInputAdapter(float timeBetweenClicksSeconds) {
-        this.timeBetweenClicksSeconds = timeBetweenClicksSeconds;
+    public FlapInputAdapter(LevelSettings levelSettings) {
+        this.levelSettings = levelSettings;
         this.isOnCooldown = false;
         this.timer = 0;
         this.subscribers = new LinkedList<>();
@@ -36,7 +36,7 @@ public class FlapInputAdapter extends InputAdapter {
             return super.touchDown(screenX, screenY, pointer, button);
         }
         this.isOnCooldown = true;
-        this.timer = timeBetweenClicksSeconds;
+        this.timer = levelSettings.clickDelay;
         for (FlapInputSubscriber subscriber : subscribers) {
             subscriber.onFlapInput();
         }

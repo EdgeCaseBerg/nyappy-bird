@@ -13,6 +13,7 @@ public class NyappyBirdGame extends Game {
     @Override
     public void create() {
         this.batch = new SpriteBatch();
-        setScreen(new FirstScreen(this));
+        LevelSettings settings = LevelSettings.createStandardLevelSettings();
+        setScreen(new FirstScreen(this, settings));
     }
 }

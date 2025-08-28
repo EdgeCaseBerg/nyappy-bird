@@ -1,6 +1,7 @@
 package spare.peetseater.nb;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -20,6 +21,7 @@ public class FirstScreen implements Screen {
     private final FitViewport viewport;
     private final FlapInputAdapter flapInputAdapter;
     NyappyBirdGame game;
+    LevelSettings levelSettings;
 
     Texture playerTexture;
     Texture tunnelTexture;
@@ -28,11 +30,12 @@ public class FirstScreen implements Screen {
     private boolean playerMustDie;
     ObstacleGenerator obstacleGenerator;
 
-    public FirstScreen(NyappyBirdGame game) {
+    public FirstScreen(NyappyBirdGame game, LevelSettings levelSettings) {
         this.camera = new OrthographicCamera();
         this.viewport = new FitViewport(game.worldWidth, game.worldHeight, camera);
         this.camera.setToOrtho(false, game.worldWidth, game.worldHeight);
         this.game = game;
+        this.levelSettings = levelSettings;
 
         playerTexture = NyappyAssets.makeTexture(Color.BLUE);
         player = new Player(4,3, 1, 1);
@@ -46,22 +49,26 @@ public class FirstScreen implements Screen {
          FlapInputSubscriber subscriber = new FlapInputSubscriber() {
              @Override
              public void onFlapInput() {
-                 player.setLift(1.2f);
+                 player.setLift(levelSettings.flapLift);
              }
          };
-         flapInputAdapter = new FlapInputAdapter(0.5f);
+         flapInputAdapter = new FlapInputAdapter(levelSettings);
          flapInputAdapter.addSubscriber(subscriber);
-         Gdx.input.setInputProcessor(flapInputAdapter);
+         InputMultiplexer inputMultiplexer = new InputMultiplexer();
+         inputMultiplexer.addProcessor(new LevelTuningInputAdapter(levelSettings));
+         inputMultiplexer.addProcessor(flapInputAdapter);
+         Gdx.input.setInputProcessor(inputMultiplexer);
+
 
         obstacleGenerator = new ObstacleGenerator(game.worldWidth - 1,game.worldHeight / 2, 2, game.worldHeight);
         generateNewObstacle();
     }
 
     private void generateNewObstacle() {
-        Vector2 obstacleSpeed = new Vector2(1, 0);
+        Vector2 obstacleSpeed = new Vector2(levelSettings.obstacleXSpeed, 0);
         List<KillPlane> obstacles = obstacleGenerator.next(
-            0.5f,
-            1.2f,
+            levelSettings.gravity,
+            levelSettings.flapLift,
             obstacleSpeed.x
         );
         killPlanes.addAll(obstacles);
@@ -73,8 +80,7 @@ public class FirstScreen implements Screen {
     }
 
     private void update(float delta) {
-        float gravity = 0.5f;
-        this.player.update(delta, gravity);
+        this.player.update(delta, levelSettings.gravity, levelSettings.decayRate);
         this.flapInputAdapter.update(delta);
         this.camera.update();
         this.game.batch.setProjectionMatrix(camera.combined);
@@ -111,7 +117,7 @@ public class FirstScreen implements Screen {
     @Override
     public void render(float delta) {
         accum += delta;
-        if (accum > 3) {
+        if (accum > levelSettings.spawnObstacleEveryNSeconds) {
             generateNewObstacle();
             accum = 0;
         }
