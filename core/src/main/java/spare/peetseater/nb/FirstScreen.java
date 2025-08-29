@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,20 +28,24 @@ public class FirstScreen implements Screen {
     Texture tunnelTexture;
     Player player;
     List<KillPlane> killPlanes;
+    HashSet<KillPlane> passedPlanes;
     private boolean playerMustDie;
     ObstacleGenerator obstacleGenerator;
+    private int score;
 
     public FirstScreen(NyappyBirdGame game, LevelSettings levelSettings) {
         this.camera = new OrthographicCamera();
         this.viewport = new FitViewport(game.worldWidth, game.worldHeight, camera);
         this.camera.setToOrtho(false, game.worldWidth, game.worldHeight);
         this.game = game;
+        this.score = 0;
         this.levelSettings = levelSettings;
 
         playerTexture = NyappyAssets.makeTexture(Color.BLUE);
         player = new Player(4,3, 1, 1);
 
         tunnelTexture = NyappyAssets.makeTexture(Color.RED);
+        passedPlanes = new HashSet<>();
         killPlanes = new LinkedList<KillPlane>();
         // The floor and ceiling
         killPlanes.add(new KillPlane(0, 0, game.worldWidth, 1));
@@ -85,6 +90,7 @@ public class FirstScreen implements Screen {
         this.camera.update();
         this.game.batch.setProjectionMatrix(camera.combined);
         playerMustDie = false;
+        float obstaclesPassed = 0;
         List<KillPlane> toRemove = new ArrayList<>();
         for (KillPlane killPlane : killPlanes) {
             if (killPlane.isOutOfSight()) {
@@ -92,15 +98,37 @@ public class FirstScreen implements Screen {
             }
             killPlane.update(delta);
             playerMustDie = playerMustDie || killPlane.intersects(player);
+
+            // Only count the planes we pass once.
+            if (passedPlanes.contains(killPlane)) {
+                continue;
+            }
+
+            boolean isFloorOrWall = killPlane.getLeftCornerX() == 0;
+            if (isFloorOrWall) {
+                continue;
+            }
+
+            float rightHandSide = killPlane.getLeftCornerX() + killPlane.getWidth();
+            if (player.getX() > rightHandSide && !killPlane.isOutOfSight()) {
+                passedPlanes.add(killPlane);
+                obstaclesPassed += 1;
+            }
         }
+
+        score += (int) (obstaclesPassed / 2);
+
+        if (playerMustDie) {
+            game.setScreen(new GameOverScreen(game, score));
+        }
+
+        // clean up memory references.
+        passedPlanes.removeAll(toRemove);
         killPlanes.removeAll(toRemove);
     }
 
     private void draw(float delta) {
         ScreenUtils.clear(Color.YELLOW);
-        if (playerMustDie) {
-            ScreenUtils.clear(Color.GREEN);
-        }
         this.game.batch.begin();
         this.game.batch.draw(playerTexture, player.getX(), player.getY(), 1, 1);
         for (KillPlane killPlane : killPlanes) {
