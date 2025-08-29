@@ -113,6 +113,7 @@ public class FirstScreen implements Screen {
         this.game.batch.end();
     }
 
+    // This is tmp until we create a proper algo
     float accum = 0;
     @Override
     public void render(float delta) {
