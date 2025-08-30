@@ -49,8 +49,8 @@ public class FirstScreen implements Screen {
         passedPlanes = new HashSet<>();
         killPlanes = new LinkedList<KillPlane>();
         // The floor and ceiling
-        killPlanes.add(new KillPlane(0, 0, game.worldWidth, 1));
-        killPlanes.add(new KillPlane(0, game.worldHeight - 1, game.worldWidth, 1));
+        killPlanes.add(new KillPlane(0, - 1, game.worldWidth, 1));
+        killPlanes.add(new KillPlane(0, game.worldHeight - 0.1f, game.worldWidth, 1));
 
          FlapInputSubscriber subscriber = new FlapInputSubscriber() {
              @Override
@@ -65,19 +65,15 @@ public class FirstScreen implements Screen {
          inputMultiplexer.addProcessor(flapInputAdapter);
          Gdx.input.setInputProcessor(inputMultiplexer);
 
-
-        obstacleGenerator = new ObstacleGenerator(game.worldWidth - 1,game.worldHeight / 2, 2, game.worldHeight);
-        generateNewObstacle();
-    }
-
-    private void generateNewObstacle() {
-        Vector2 obstacleSpeed = new Vector2(levelSettings.obstacleXSpeed, 0);
-        List<KillPlane> obstacles = obstacleGenerator.next(
-            levelSettings.gravity,
-            levelSettings.flapLift,
-            obstacleSpeed.x
+        obstacleGenerator = new ObstacleGenerator(
+            game.worldWidth,
+            player.getY(),
+            player.getHeight() * 1.75f,
+            game.worldHeight,
+            2f,
+            5f,
+            levelSettings
         );
-        killPlanes.addAll(obstacles);
     }
 
     @Override
@@ -88,6 +84,9 @@ public class FirstScreen implements Screen {
     private void update(float delta) {
         this.player.update(delta, levelSettings.gravity, levelSettings.decayRate);
         this.flapInputAdapter.update(delta);
+        List<KillPlane> newObstacles = this.obstacleGenerator.update(delta);
+        killPlanes.addAll(newObstacles);
+
         this.camera.update();
         this.game.batch.setProjectionMatrix(camera.combined);
         playerMustDie = false;
@@ -151,15 +150,9 @@ public class FirstScreen implements Screen {
         this.game.batch.end();
     }
 
-    // This is tmp until we create a proper algo
-    float accum = 0;
+
     @Override
     public void render(float delta) {
-        accum += delta;
-        if (accum > levelSettings.spawnObstacleEveryNSeconds) {
-            generateNewObstacle();
-            accum = 0;
-        }
         update(delta);
         draw(delta);
     }
