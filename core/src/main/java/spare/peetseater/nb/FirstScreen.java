@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -138,6 +139,15 @@ public class FirstScreen implements Screen {
                 killPlane.getWidth(), killPlane.getHeight()
             );
         }
+        this.game.visitorFont.draw(
+            this.game.batch,
+            "Score: " + score,
+            0.25f,
+            0.75f,
+            game.worldWidth,
+            Align.left,
+            false
+        );
         this.game.batch.end();
     }
 
