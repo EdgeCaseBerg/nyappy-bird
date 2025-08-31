@@ -25,14 +25,13 @@ public class FirstScreen implements Screen {
     NyappyBirdGame game;
     LevelSettings levelSettings;
 
-    Texture playerTexture;
-    Texture tunnelTexture;
     Player player;
     List<KillPlane> killPlanes;
     HashSet<KillPlane> passedPlanes;
     private boolean playerMustDie;
     ObstacleGenerator obstacleGenerator;
     private int score;
+    ScrollingStars scrollingStars;
 
     public FirstScreen(NyappyBirdGame game, LevelSettings levelSettings) {
         this.camera = new OrthographicCamera();
@@ -41,11 +40,10 @@ public class FirstScreen implements Screen {
         this.game = game;
         this.score = 0;
         this.levelSettings = levelSettings;
+        this.scrollingStars =  new ScrollingStars(40, game.worldWidth, game.worldHeight, levelSettings.obstacleXSpeed);
 
-        playerTexture = NyappyAssets.makeTexture(Color.BLUE);
         player = new Player(4,3, 1, 1);
 
-        tunnelTexture = NyappyAssets.makeTexture(Color.RED);
         passedPlanes = new HashSet<>();
         killPlanes = new LinkedList<KillPlane>();
         // The floor and ceiling
@@ -86,7 +84,7 @@ public class FirstScreen implements Screen {
         this.flapInputAdapter.update(delta);
         List<KillPlane> newObstacles = this.obstacleGenerator.update(delta);
         killPlanes.addAll(newObstacles);
-
+        this.scrollingStars.update(delta);
         this.camera.update();
         this.game.batch.setProjectionMatrix(camera.combined);
         playerMustDie = false;
@@ -127,13 +125,24 @@ public class FirstScreen implements Screen {
         killPlanes.removeAll(toRemove);
     }
 
+    float animationFrame = 0;
     private void draw(float delta) {
-        ScreenUtils.clear(Color.YELLOW);
+        animationFrame += delta;
+        ScreenUtils.clear(Color.NAVY);
         this.game.batch.begin();
-        this.game.batch.draw(playerTexture, player.getX(), player.getY(), 1, 1);
+        this.game.batch.draw(game.background, 0, 0, game.worldWidth, game.worldHeight);
+        this.scrollingStars.draw(game);
+        this.game.batch.draw(
+            game.rainbowSprite.getKeyFrame(animationFrame, true),
+            player.getX() - 0.65f,
+            player.getY(),
+            1,
+            1
+        );
+        this.game.batch.draw(game.playerSprite.getKeyFrame(Math.abs(player.getY()), true), player.getX(), player.getY(), 1, 1);
         for (KillPlane killPlane : killPlanes) {
-            this.game.batch.draw(
-                tunnelTexture,
+            game.obstacleNinePatch.draw(
+                this.game.batch,
                 killPlane.getLeftCornerX(), killPlane.getLeftCornerY(),
                 killPlane.getWidth(), killPlane.getHeight()
             );

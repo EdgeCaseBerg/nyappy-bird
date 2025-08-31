@@ -4,8 +4,8 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -15,6 +15,11 @@ public class NyappyBirdGame extends Game {
 
     SpriteBatch batch;
     BitmapFont visitorFont;
+    Animation<TextureRegion> playerSprite;
+    Animation<TextureRegion> rainbowSprite;
+    NinePatch obstacleNinePatch;
+    Animation<TextureRegion> starSprite;
+    Texture background;
 
     AssetManager assetManager;
 
@@ -22,6 +27,11 @@ public class NyappyBirdGame extends Game {
     public void create() {
         this.batch = new SpriteBatch();
         this.visitorFont = this.loadFont(1f);
+        this.playerSprite = this.loadNyanCat();
+        this.rainbowSprite = this.loadRainbow();
+        this.obstacleNinePatch = this.loadObstacleNinePatch();
+        this.starSprite = this.loadStar();
+        this.background = this.loadBackground();
 
         LevelSettings settings = LevelSettings.createStandardLevelSettings();
         setScreen(new FirstScreen(this, settings));
@@ -41,4 +51,39 @@ public class NyappyBirdGame extends Game {
         font.setUseIntegerPositions(false);
         return font;
     }
+
+    private Animation<TextureRegion> loadNyanCat() {
+        Texture sheet = new Texture(Gdx.files.internal("sprite/nyankitty.png"));
+        TextureRegion[][] frames = TextureRegion.split(sheet, 32, 24);
+        Animation<TextureRegion> animation = new Animation<>(0.025f, frames[0]);
+        return animation;
+    }
+
+    private Animation<TextureRegion> loadRainbow() {
+        Texture sheet = new Texture(Gdx.files.internal("sprite/nyanbow.png"));
+        TextureRegion[][] frames = TextureRegion.split(sheet, 32, 24);
+        Animation<TextureRegion> animation = new Animation<>(0.025f, frames[0]);
+        return animation;
+    }
+
+    private NinePatch loadObstacleNinePatch() {
+        Texture texture = new Texture(Gdx.files.internal("sprite/obstacle.png"));
+        NinePatch ninePatch = new NinePatch(texture, 4, 4, 4, 4);
+        ninePatch.scale(worldWidth / (float)Gdx.graphics.getWidth(), worldHeight / (float)Gdx.graphics.getHeight());
+        return ninePatch;
+    }
+
+    private Animation<TextureRegion> loadStar() {
+        Texture sheet = new Texture(Gdx.files.internal("sprite/star.png"));
+        TextureRegion[][] frames = TextureRegion.split(sheet, 8, 8);
+        Animation<TextureRegion> animation = new Animation<>(0.15f, frames[0]);
+        return animation;
+    }
+
+    private Texture loadBackground() {
+        Texture texture = new Texture(Gdx.files.internal("sprite/bg.png"));
+        return texture;
+    }
+
+
 }
