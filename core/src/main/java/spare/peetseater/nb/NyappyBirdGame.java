@@ -3,6 +3,7 @@ package spare.peetseater.nb;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
@@ -20,6 +21,7 @@ public class NyappyBirdGame extends Game {
     NinePatch obstacleNinePatch;
     Animation<TextureRegion> starSprite;
     Texture background;
+    Music bgm;
 
     AssetManager assetManager;
 
@@ -32,9 +34,11 @@ public class NyappyBirdGame extends Game {
         this.obstacleNinePatch = this.loadObstacleNinePatch();
         this.starSprite = this.loadStar();
         this.background = this.loadBackground();
+        this.bgm = this.loadBGM();
 
         LevelSettings settings = LevelSettings.createStandardLevelSettings();
         setScreen(new FirstScreen(this, settings));
+        this.bgm.play();
     }
 
     private BitmapFont loadFont(float ratioTo1WorldUnit) {
@@ -85,5 +89,10 @@ public class NyappyBirdGame extends Game {
         return texture;
     }
 
-
+    private Music loadBGM() {
+        Music music = Gdx.audio.newMusic(Gdx.files.internal("music/nyancat.mp3"));
+        music.setVolume(0.5f);;
+        music.setLooping(true);
+        return music;
+    }
 }
