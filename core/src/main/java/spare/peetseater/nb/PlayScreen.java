@@ -5,8 +5,6 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -17,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /** First screen of the application. Displayed after the application is created. */
-public class FirstScreen implements Screen {
+public class PlayScreen implements Screen {
 
     private final OrthographicCamera camera;
     private final FitViewport viewport;
@@ -33,7 +31,7 @@ public class FirstScreen implements Screen {
     private int score;
     ScrollingStars scrollingStars;
 
-    public FirstScreen(NyappyBirdGame game, LevelSettings levelSettings) {
+    public PlayScreen(NyappyBirdGame game, LevelSettings levelSettings) {
         this.camera = new OrthographicCamera();
         this.viewport = new FitViewport(game.worldWidth, game.worldHeight, camera);
         this.camera.setToOrtho(false, game.worldWidth, game.worldHeight);
@@ -50,18 +48,18 @@ public class FirstScreen implements Screen {
         killPlanes.add(new KillPlane(0, - 1, game.worldWidth, 1));
         killPlanes.add(new KillPlane(0, game.worldHeight - 0.1f, game.worldWidth, 1));
 
-         FlapInputSubscriber subscriber = new FlapInputSubscriber() {
-             @Override
-             public void onFlapInput() {
-                 player.setLift(levelSettings.flapLift);
-             }
-         };
-         flapInputAdapter = new FlapInputAdapter(levelSettings);
-         flapInputAdapter.addSubscriber(subscriber);
-         InputMultiplexer inputMultiplexer = new InputMultiplexer();
-         inputMultiplexer.addProcessor(new LevelTuningInputAdapter(levelSettings));
-         inputMultiplexer.addProcessor(flapInputAdapter);
-         Gdx.input.setInputProcessor(inputMultiplexer);
+        FlapInputSubscriber subscriber = new FlapInputSubscriber() {
+            @Override
+            public void onFlapInput() {
+                player.setLift(levelSettings.flapLift);
+            }
+        };
+        flapInputAdapter = new FlapInputAdapter(levelSettings);
+        flapInputAdapter.addSubscriber(subscriber);
+        InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(new LevelTuningInputAdapter(levelSettings));
+        inputMultiplexer.addProcessor(flapInputAdapter);
+        Gdx.input.setInputProcessor(inputMultiplexer);
 
         obstacleGenerator = new ObstacleGenerator(
             game.worldWidth,

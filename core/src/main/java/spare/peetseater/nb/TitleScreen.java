@@ -9,21 +9,19 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-public class GameOverScreen implements Screen {
+public class TitleScreen implements Screen {
 
     private final OrthographicCamera camera;
     private final FitViewport viewport;
-    private final int score;
     private final ScrollingStars stars;
     NyappyBirdGame game;
 
-    public GameOverScreen(NyappyBirdGame game, int score) {
+    public TitleScreen(NyappyBirdGame game) {
         this.camera = new OrthographicCamera();
-        this.viewport = new FitViewport(game.worldWidth, game.worldHeight, camera);
         this.camera.setToOrtho(false, game.worldWidth, game.worldHeight);
+        this.viewport = new FitViewport(game.worldWidth, game.worldHeight, camera);
         this.stars = new ScrollingStars(25, game.worldWidth, game.worldHeight, 0.1f);
         this.game = game;
-        this.score = score;
     }
 
     @Override
@@ -34,7 +32,7 @@ public class GameOverScreen implements Screen {
         this.camera.update();
         this.stars.update(delta);
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            this.game.showPlayScreen();
+            game.showPlayScreen();
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit();
@@ -52,25 +50,21 @@ public class GameOverScreen implements Screen {
         this.stars.draw(game);
         game.visitorFont.draw(
             game.batch,
-            "Game over!",
+            "NYAPPY CAT",
             0,
             game.worldHeight - 2,
             game.worldWidth,
             Align.center,
             false
         );
-        game.visitorFont.draw(
-            game.batch,
-            "Score: " + score,
-            0,
-            game.worldHeight - 4,
-            game.worldWidth,
-            Align.center,
-            false
+        game.batch.draw(
+            game.playerSprite.getKeyFrame(0, false),
+            game.worldWidth / 2, game.worldHeight - 4,
+            1, 1
         );
         game.visitorFont.draw(
             game.batch,
-            "SPACE to restart",
+            "SPACE to start",
             0,
             game.worldHeight - 6,
             game.worldWidth,

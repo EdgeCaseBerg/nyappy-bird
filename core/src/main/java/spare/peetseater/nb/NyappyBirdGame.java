@@ -22,8 +22,9 @@ public class NyappyBirdGame extends Game {
     Animation<TextureRegion> starSprite;
     Texture background;
     Music bgm;
-
-    AssetManager assetManager;
+    private PlayScreen playScreen;
+    private TitleScreen titleScreen;
+    private LevelSettings settings;
 
     @Override
     public void create() {
@@ -36,9 +37,22 @@ public class NyappyBirdGame extends Game {
         this.background = this.loadBackground();
         this.bgm = this.loadBGM();
 
-        LevelSettings settings = LevelSettings.createStandardLevelSettings();
-        setScreen(new FirstScreen(this, settings));
-        this.bgm.play();
+        settings = LevelSettings.createStandardLevelSettings();
+        playScreen = new PlayScreen(this, settings);
+        titleScreen = new TitleScreen(this);
+        showTitleScreen();
+    }
+
+    public void showTitleScreen() {
+        setScreen(titleScreen);
+    }
+
+    public void showPlayScreen() {
+        if (!this.bgm.isPlaying()) {
+            this.bgm.play();
+        }
+        playScreen = new PlayScreen(this, settings);
+        setScreen(playScreen);
     }
 
     private BitmapFont loadFont(float ratioTo1WorldUnit) {

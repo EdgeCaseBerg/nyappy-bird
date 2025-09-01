@@ -47,7 +47,7 @@ public class ObstacleGenerator {
 
     public List<KillPlane> next() {
         // Desired displacement
-        float width = 0.5f;
+        float width = 1.5f;
         float y1 = this.lastY;
         float t2 = MathUtils.random(minSecondsBetweenObstacles, maxSecondsBetweenObstacles);
         float gapSize = MathUtils.lerp(minGapSize, minGapSize * 1.75f, MathUtils.random());
